@@ -1,3 +1,7 @@
+# from https://wiki.tiker.net/PyCuda/Examples/Mandelbrot
+# with few minor changes
+
+
 # Mandelbrot calculate using GPU, Serial numpy and faster numpy
 # Use to show the speed difference between CPU and GPU calculations
 # ian@ianozsvald.com July 2010
@@ -5,8 +9,6 @@
 # Based on vegaseat's TKinter/numpy example code from 2006
 # http://www.daniweb.com/code/snippet216851.html#
 # with minor changes to move to numpy from the obsolete Numeric
-
-# from https://wiki.tiker.net/PyCuda/Examples/Mandelbrot
 
 import sys
 import numpy as nm
