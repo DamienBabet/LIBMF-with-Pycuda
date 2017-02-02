@@ -26,6 +26,10 @@ p2=p.reshape((nbUsers+AjoutUsersFictifs,K))
 q2=q.reshape((K,nbFilms+AjoutFilmsFictifs))
 r=np.dot(p2,q2).T
 
+r_sparse = sp.rand(nbUsers+AjoutUsersFictifs,nbFilms+AjoutFilmsFictifs,0.1)
+r_data=np.array([r_sparse.row, r_sparse.col, r_sparse.data])
+r_data=np.transpose(r_data)
+
 np.shape(r)
 
 mod = SourceModule("""
