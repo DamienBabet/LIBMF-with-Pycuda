@@ -12,6 +12,9 @@ nbFilms=55
 nbBloc=10
 K=3
 nbIter=2
+gamma=0.002
+lambdaP=0.1
+lambdaQ=0.1
 
 AjoutUsersFictifs=int(nbUsers-np.floor(nbUsers/nbBloc)*nbBloc)
 AjoutFilmsFictifs=int(nbFilms-np.floor(nbFilms/nbBloc)*nbBloc)
@@ -44,15 +47,14 @@ mod = SourceModule("""
         float rij = v[(3 * r) + 2];
         pqij = 0;
         for (int k = 0; k < K; ++k){
-          p_temp[k] = p[start+(i*K)+k];
-          q_temp[k] = q[start+(j*K)+k];
-          pqij += p_temp[k] * q_temp[k];
-          float eij = rij - pqij;}
-        for (int k = 0; k < K; ++k)
+          p_temp[k] = p[startP+(i*K)+k];
+          q_temp[k] = q[startQ+(j*K)+k];
+          pqij += p_temp[k] * q_temp[k];}
+        float eij = rij - pqij;
+        for (int k = 0; k < K; ++k){
           p[start+(i*K)+k] += gamma * eij * q_temp[k] - gamma * lambdaP * p_temp[k];
-        for (int k = 0; k < K; ++k)
-          q[start+(j*K)+k] += gamma * eij * p_temp[k] - gamma * lambdaQ * q_temp[k];
-        }
+          q[start+(j*K)+k] += gamma * eij * p_temp[k] - gamma * lambdaQ * q_temp[k];}
+      }
     }
     """)
 
@@ -74,19 +76,20 @@ for l in range(nbIter):
     # Mise en forme de R selon l'ordre de la permutation
     r_permut
     
+    # Creation de V vecteur des coordonnees des debuts de blocks sur R
     
     # Transfert des données sur la GPU
     p_gpu = cuda.mem_alloc(p.nbytes)
     cuda.memcpy_htod(p_gpu, p)
-    q_gpu = cuda.mem_alloc(Q.nbytes)
+    q_gpu = cuda.mem_alloc(q_permut.nbytes)
     cuda.memcpy_htod(q_gpu, q_permut)
-    r_gpu = cuda.mem_alloc(R.nbytes)
+    r_gpu = cuda.mem_alloc(r_permut.nbytes)
     cuda.memcpy_htod(r_gpu, r_permut)
     
     # Mettre __syncthreads();  dans le code du kernel
     
     # Execution du kernel
-    func(a_gpu, block = (nbCasesBloc, nbCasesBloc, 1))
+    func(p_gpu, q_gpu, r_gpu, v_gpu, tP, tQ, K, gamma, lambdaP, lambdaQ)
 
     #Remettre Q dans l'ordre
     q2=q_permut.reshape((K,nbFilms+AjoutFilmsFictifs))
