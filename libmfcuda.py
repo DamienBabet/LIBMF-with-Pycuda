@@ -56,6 +56,8 @@ mod = SourceModule("""
     }
     """)
 
+func = mod.get_function("block_update")
+
 for l in range(nbIter):
     
     #Choisir une permutation des colonnes
@@ -84,7 +86,6 @@ for l in range(nbIter):
     # Mettre __syncthreads();  dans le code du kernel
     
     # Execution du kernel
-    func = mod.get_function("doublify")
     func(a_gpu, block = (nbCasesBloc, nbCasesBloc, 1))
 
     #Remettre Q dans l'ordre
