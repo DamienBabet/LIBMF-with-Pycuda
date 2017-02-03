@@ -94,7 +94,8 @@ for l in range(nbIter):
     for i in range(1,nbBloc) :
         r_permut=np.append(r_permut,np.array(df[(df["numBlocLigne"]==i) & (df["numBlocColonne"]==L[i])][[0,1,2]]).flatten()).flatten()
         v_permut=np.append(v_permut,np.array(v[(v["numBlocLigne"]==i) & (v["numBlocColonne"]==L[i])][[2]]).flatten()).flatten()
-      
+    v_permut_cum=np.append(0,np.cumsum(v_permut.reshape(nbBloc,3).T[2][range(0,len(v_permut.reshape(nbBloc,3).T[2])-1)]))
+    
     # Transfert des données sur la GPU
     p_gpu = cuda.mem_alloc(p.nbytes)
     cuda.memcpy_htod(p_gpu, p)
@@ -102,8 +103,8 @@ for l in range(nbIter):
     cuda.memcpy_htod(q_gpu, q_permut)
     r_gpu = cuda.mem_alloc(r_permut.nbytes)
     cuda.memcpy_htod(r_gpu, r_permut)
-    v_gpu = cuda.mem_alloc(v_permut.nbytes)
-    cuda.memcpy_htod(v_gpu, v_permut)
+    v_gpu = cuda.mem_alloc(v_permut_cum.nbytes)
+    cuda.memcpy_htod(v_gpu, v_permut_cum)
     # Mettre __syncthreads();  dans le code du kernel
     
     # Execution du kernel
