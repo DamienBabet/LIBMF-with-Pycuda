@@ -1,0 +1,69 @@
+https://grouplens.org/datasets/movielens/
+
+
+df = pd.read_csv("ratings_small.csv", sep="," )
+
+ou si on est avec un plus gros fichier :
+
+
+from pyspark import SparkConf, SparkContext
+
+# Chargement du fichier des notes
+notes = sc.textFile("ratings_small.csv")
+
+# Découpage des lignes en indiquant le séparateur
+notes = notes.map(lambda ligne: ligne.split(','))
+
+# On garde que les trois premières valeurs (idUser, idFilm, Note)
+notes = notes.map(lambda champs: (champs[0], champs[1], champs[2]))
+
+# Suppression de la ligne des titres
+notesSansTitre = notes.filter(lambda row: row[0]!='' and row[0]!='userId')
+
+# Format des valeurs (entiers pour les identifiants et float pour la note)
+notesSansTitre = notesSansTitre.map(lambda row: [int(row[0]), int(row[1]), float(row[2])])
+
+from pyspark.sql.types import StructType
+from pyspark.sql.types import StructField
+from pyspark.sql.types import StringType
+
+schema = StructType([StructField(str(i), StringType(), True) for i in range(3)])
+df = sqlContext.createDataFrame(notesSansTitre, schema)
+
+df=df.toPandas()
+df.columns=('userId', 'movieId', 'rating')
+import pandas as pd
+df['userId'] = pd.to_numeric(df['userId'])
+
+
+
+**************************
+
+Pour créer P et Q à partir de R :
+
+nbUsers=len(np.unique(df[[0]]))
+nbFilms=len(np.unique(df[[1]]))
+
+AjoutUsersFictifs=int(np.ceil(np.true_divide(nbUsers,nbBloc))*nbBloc-nbUsers)
+AjoutFilmsFictifs=int(np.ceil(np.true_divide(nbFilms,nbBloc))*nbBloc-nbFilms)
+
+p=np.random.uniform(0,1,(((nbUsers+AjoutUsersFictifs)*Knum)))
+q=np.random.uniform(0,1,(((nbFilms+AjoutFilmsFictifs)*Knum)))
+
+tP=(nbUsers+AjoutUsersFictifs)/nbBloc
+tQ=(nbFilms+AjoutFilmsFictifs)/nbBloc
+
+p2=p.reshape((nbUsers+AjoutUsersFictifs,Knum))
+q2=q.reshape((Knum,nbFilms+AjoutFilmsFictifs))
+r=np.dot(p2,q2).T
+
+tp=int((nbUsers+AjoutUsersFictifs)/nbBloc)
+tq=int((nbFilms+AjoutFilmsFictifs)/nbBloc)
+
+df["numBlocLigne"] =df.apply(lambda row : int(row[0]/tp), axis = 1 )
+df["numBlocColonne"] =df.apply(lambda row : int(row[1]/tq), axis = 1 )
+
+v = pd.DataFrame(df.groupby(["numBlocLigne", "numBlocColonne"]).count())
+v = v.reset_index()[["numBlocLigne","numBlocColonne","rating"]]
+
+
