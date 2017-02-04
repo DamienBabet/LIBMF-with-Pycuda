@@ -111,8 +111,8 @@ for l in range(nbIter):
     func(p_gpu, q_gpu, r_gpu, v_gpu, Knum, tP, tQ, gamma, lambdaP, lambdaQ, block=(nbBloc,1,1))
 
     #Remettre Q dans l'ordre
-    q2=q_permut.reshape((Knum,nbFilms+AjoutFilmsFictifs))
-    qEnBloc=q2.T.reshape(nbBloc,int((nbFilms+AjoutFilmsFictifs)/nbBloc),Knum)
-    q=qEnBloc[int(np.floor(np.where(L==0)))].tolist()
+    q2=q_permut.reshape((nbFilms+AjoutFilmsFictifs, K))
+    qEnBloc=q2.reshape(nbBloc,int((nbFilms+AjoutFilmsFictifs)/nbBloc),K)
+    q_permut=qEnBloc[L[0]].flatten()
     for i in range(1,nbBloc) :
-        q=np.append(q,qEnBloc[int(np.floor(np.where(L==i)))].tolist())
+        q_permut=np.append(q_permut,qEnBloc[L[i]].flatten())
