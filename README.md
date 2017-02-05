@@ -8,3 +8,8 @@ Running a first demo example with pycuda was not easy. We worked first on a Mac 
 
 The Numba package, part of the Anaconda python distribution, provides another solution to access CUDA via python. It requires however a device with a compute capability of 2 or higher, whereas our GPU has a capability of 1 according to CUDA standards.
 
+We tested the installation with the computation of a Mandelbrot set with the code essai1pycudaMandelbrot.py, and observed a 50x acceleration via Cuda.
+
+The project is still unfinished. At this stage, the algorithm implemented is not yet LIBMF (FPSGD) but rather a simpler version, DSGD, and only for non-negative matrix factorization. We implemented a iterative (not parallelized) version of the algorithm (code in the file libmfiteratif.py) and a demo version with Cuda and fixed imput data (code in the file libmf_cuda_demo.py). The complete version with Cuda and accepting random imput data (or real data) is not yet working.
+
+We also worked on the formatting of real data to use as an imput in our algorithm.
